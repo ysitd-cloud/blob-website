@@ -10,10 +10,11 @@ const {Client} = require('minio');
 
 const app = connect();
 const client = new Client({
-  endpoint: process.env.BLOB_ENDPOINT,
-  port: process.env.BLOB_PORT,
+  endPoint: process.env.BLOB_ENDPOINT,
+  port: parseInt(process.env.BLOB_PORT, 10),
   accessKey: process.env.BLOB_ACCESS_KEY,
-  secretKey: process.env.BLOB_SECRET_KEY
+  secretKey: process.env.BLOB_SECRET_KEY,
+  secure: false
 });
 const cache = new LRUCache({
   maxElements: 1000,
@@ -30,7 +31,7 @@ app.use((req, resp, next) => {
     path += path.endsWith('/') ? 'index.html' : '/index.html';
   }
   req.requestUri = `${req.headers['host']}${path}`;
-  console.log(req.requestUri);
+  console.log(`Request: ${req.requestUri}`);
   next();
 });
 
@@ -47,7 +48,7 @@ app.use((req, resp, next) => {
 app.use((req, resp) => {
   client.getObject(process.env.BLOB_BUCKET, req.requestUri, (err, stream) => {
     if (err) {
-      resp.status(404);
+      resp.writeHead(404);
       resp.end();
     } else {
       const buffers = [];
@@ -60,3 +61,5 @@ app.use((req, resp) => {
     }
   });
 });
+
+app.listen(process.env.PORT);
