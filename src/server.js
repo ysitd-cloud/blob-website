@@ -30,7 +30,8 @@ app.use((req, resp, next) => {
   if (!pathCheckRegexp.test(path)) {
     path += path.endsWith('/') ? 'index.html' : '/index.html';
   }
-  req.requestUri = `${req.headers['host']}${path}`;
+  const host = req.headers.host.replace(/:\d+/, '');
+  req.requestUri = `${host}${path}`;
   console.log(`Request: ${req.requestUri}`);
   next();
 });
@@ -62,4 +63,4 @@ app.use((req, resp) => {
   });
 });
 
-app.listen(process.env.PORT);
+app.listen(process.env.PORT, '127.1.1.1');
